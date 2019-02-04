@@ -1,0 +1,21 @@
+svg {
+  box-sizing: border-box;
+  border: 1px solid rgb(212, 212, 212);
+}
+
+circle {
+  stroke: rgb(95, 176, 228);
+  stroke-width: 2;
+  fill: rgba(205, 246, 255, 0.3);
+}
+
+line {
+  stroke: rgb(212, 212, 212);
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+path {
+	fill: none;
+	stroke: #999;
+}
