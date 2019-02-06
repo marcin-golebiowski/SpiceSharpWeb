@@ -1,12 +1,23 @@
-svg {
+svg.editor-area {
   box-sizing: border-box;
   border: 1px solid rgb(212, 212, 212);
 }
 
+svg.library {
+  display: none;
+}
+
 circle {
-  stroke: rgb(95, 176, 228);
-  stroke-width: 2;
-  fill: rgba(205, 246, 255, 0.3);
+  stroke-width: 1;
+  fill: black;
+}
+
+circle.active {
+  stroke: red;
+}
+
+g.pathPointGroupActive circle{
+  fill: royalblue;
 }
 
 line {
@@ -15,7 +26,21 @@ line {
   shape-rendering: crispEdges;
 }
 
-path {
+path.wire {
 	fill: none;
-	stroke: #999;
+	stroke: #777;
+}
+
+path.active-wire {
+	fill: none;
+	stroke: #777;
+}
+
+.active-wire {
+  stroke: black;
+  cursor: pointer;
+  stroke-width: 3px;
+}
+.wire {
+  stroke-width: 1px;
 }
