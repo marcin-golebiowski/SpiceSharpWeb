@@ -10,6 +10,11 @@ var currentPoint = null;
 var line = d3.line();
 var gen = line.curve(d3.curveStepBefore);
 var svg, svgrect, group, lineDrag,pathPointsDrag;
+var selectionData = null;
+var selectedData = null;
+var dragging = true;
+var x1Start = 0;
+var y1Start = 0;
 
 var gridMenu = [
   {
@@ -352,12 +357,10 @@ function init() {
   
   svg
   .on("mousemove", function(d) {
-    var x1 = round(d3.event.x, resolution);
-    var y1 = round(d3.event.y, resolution);
-  
-    
     if (writeDrawing) {
-  
+      var x1 = round(d3.event.x, resolution);
+      var y1 = round(d3.event.y, resolution);
+    
       var activePoint = null;
       var isActivePointLast = null;
   
@@ -394,8 +397,111 @@ function init() {
       }
       update();
     }
+
+    if (dragging && selectedData != null && selectedData[2] != 0 && selectedData[3] != 0)
+    {
+      var x1 = d3.event.x;
+      var y1 = d3.event.y;
+
+      var xDiff = x1 - x1Start;
+      var yDiff = y1 - x2Start;
+
+      wires.forEach(function (wire) { wire.points.forEach(function (p) { 
+
+        if (p[7])
+        {
+            p[0] = round(p[3] + xDiff, resolution);
+            p[1] = round(p[4] + yDiff, resolution);
+        }
+
+      })});
+
+      selectedData[0] = xDiff + selectedData[4];
+      selectedData[1] = yDiff + selectedData[5];
+      update();
+      return;
+    }
+
+    if (selectionData != null) {
+      var x1 = d3.event.x;
+      var y1 = d3.event.y;
+      var width = Math.abs(x1 - selectionData[0]);
+      var height = Math.abs(y1 - selectionData[1]);
+      selectionData[2] = width;
+      selectionData[3] = height;
+
+      update();
+    }
+  });
+  svg.on("click", gridClick)
+
+  svg.on("mousedown", function() {
+    if (writeDrawing) {
+      return;
+    }
+
+    if (selectionData != null){
+      return;
+    }
+
+    if (selectedData != null) {
+      dragging = true;
+      x1Start = d3.event.x;
+      x2Start = d3.event.y;
+
+      wires.forEach(function (wire) { wire.points.forEach(function (p) {
+
+         if ((p[0] > selectedData[0] && p[0] < selectedData[0] + selectedData[2])
+          && (p[1] > selectedData[1] && p[1] < selectedData[1] + selectedData[3]))
+          {
+            p[7] = true;  
+            p[3] = p[0]; 
+            p[4] = p[1];
+          }
+        })});
+    }
+   
+    var x1 = d3.event.x;
+    var y1 = d3.event.y;
+    selectionData = [x1, y1, 0, 0];
+
+    svg
+      .selectAll("rect.selection")
+      .data([selectionData])
+      .enter()
+      .append("rect")
+      .attr("class", "selection")       
   });
 
+  svg.on("mouseup", function() {
+
+    dragging = false;
+    svg
+    .selectAll("rect.selected")
+    .remove();
+
+    if (selectionData != null) {
+      selectedData = [selectionData[0],selectionData[1], selectionData[2], selectionData[3], selectionData[0], selectionData[1]];
+      
+      wires.forEach(function (wire) { wire.points.forEach(function (p) {
+           p[7] = false;  
+      })});
+
+      svg
+        .append("rect")
+        .attr("class", "selected")      
+        .datum(selectedData)
+        .attr("x", function(d) { return d[0] })
+        .attr("y", function(d) { return d[1]; })
+        .attr("width", function(d) { return d[2]; })
+        .attr("height", function(d) { return d[3]; });
+  
+      selectionData = null;
+    }
+      svg
+      .selectAll("rect.selection")
+      .remove();
+    });
   var wiresPaths = svg.selectAll("path.wire").data(wires);
 
   wiresPaths
@@ -417,7 +523,6 @@ function init() {
     })
   );
 
-  svg.on("click", gridClick)
 
   group = svg
   .append("g")
@@ -609,7 +714,24 @@ function redrawComponents() {
     });
 }
 
+function updateSelection() {
+  svg
+  .selectAll("rect.selection")
+  .attr("x", function(d) { return d[0] })
+  .attr("y", function(d) { return d[1]; })
+  .attr("width", function(d) { return d[2]; })
+  .attr("height", function(d) { return d[3]; })
+
+  svg
+  .selectAll("rect.selected")
+  .attr("x", function(d) { return d[0] })
+  .attr("y", function(d) { return d[1]; })
+  .attr("width", function(d) { return d[2]; })
+  .attr("height", function(d) { return d[3]; })
+}
+
 function update() {
+  updateSelection();
   redrawWires();
   redrawWirePoints();
 }

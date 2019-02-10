@@ -44,3 +44,17 @@ path.active-wire {
 .wire {
   stroke-width: 1px;
 }
+
+rect.selection {
+  fill:rgba(0,0,255,0.05);
+  stroke-width:2;
+  stroke:rgb(0,0,0, 0.1);
+}
+
+rect.selected {
+  stroke-width:2;
+  fill:rgba(0,0,255,0.05);
+  stroke:rgb(0,0,0, 0.3);
+  shape-rendering:crispEdges;
+  cursor: move;
+}
