@@ -9,21 +9,73 @@ var wires = [];
 var currentPoint = null;
 var line = d3.line();
 var gen = line.curve(d3.curveStepBefore);
-var svg, svgrect, group, lineDrag,pathPointsDrag;
+var svg, svgrect, group,wiresGroup, lineDrag,pathPointsDrag;
 var selectionData = null;
 var selectedData = null;
 var dragging = true;
 var x1Start = 0;
 var y1Start = 0;
 
+
+function removeWirePoint(point, val) {
+  var g = d3.select(point.parentNode);
+  var d = g.datum();
+  var points = d.points;
+  for (var i = points.length - 1; i >= 0; i--) {
+    if (points[i][0] === val[0] && points[i][1] === val[1]) {
+      points.splice(i, 1);
+      break;
+    }
+  }
+
+  if (points.length == 0) {
+    for (var i = wires.length - 1; i >= 0; i--) {
+      if (wires[i] == d) {
+        wires.splice(i, 1);
+      }
+    }
+  }
+
+  update();
+}
+
+function finishWire(pop) {
+  if (pop)
+  {
+    currentWire.points.pop();
+  }
+  writeDrawing = false;
+  currentPoint = null;
+  currentWire = null;
+  wires.forEach(function (wire) { wire.points.forEach(function (p) { p[2] = false})});
+  update();
+  d3.event.stopPropagation();
+  return;
+}
+
+function removeWire(data) {
+  for (var i = wires.length - 1; i >= 0; i--) {
+    if (wires[i] == data) {
+      wires.splice(i, 1);
+      update();
+      break;
+    }
+  }
+
+  writeDrawing = false;
+}
+
+function newWire() {
+  writeDrawing = true;
+  currentWire = { id: ++id, points: [] };
+  wires.push(currentWire);
+}
+
 var gridMenu = [
   {
     title: "Draw wire",
     action: function(data) {
-      writeDrawing = true;
-
-      currentWire = { id: ++id, points: [] };
-      wires.push(currentWire);
+      newWire();
     },
     disabled: function() {
       return writeDrawing;
@@ -33,13 +85,7 @@ var gridMenu = [
   {
     title: "Finish wire",
     action: function(data) {
-      currentWire.points.pop();
-      writeDrawing = false;
-      currentPoint = null;
-      currentWire = null;
-      wires.forEach(function (wire) { wire.points.forEach(function (p) { p[2] = false})});
-      update();
-      return;
+      finishWire(true);
     },
     disabled: function() {
       return !writeDrawing;
@@ -50,40 +96,17 @@ var wireMenu = [
   {
     title: "Remove wire",
     action: function(data) {
-      for (var i = wires.length - 1; i >= 0; i--) {
-        if (wires[i] == data) {
-          wires.splice(i, 1);
-          update();
-          break;
-        }
-      }
-
-      writeDrawing = false;
+      removeWire(data);
+    },
+    disabled: function() {
+      return writeDrawing;
     }
   }];
 var pathPointMenu = [
     {
       title: "Remove wire point",
       action: function(val) {
-        var g = d3.select(this.parentNode);
-        var d = g.datum();
-        var points = d.points;
-        for (var i = points.length - 1; i >= 0; i--) {
-          if (points[i][0] === val[0] && points[i][1] === val[1]) {
-            points.splice(i, 1);
-            break;
-          }
-        }
-
-        if (points.length == 0){
-          for (var i = wires.length - 1; i >= 0; i--) {
-            if (wires[i] == d) {
-              wires.splice(i, 1);
-            }
-          }
-        }
-
-        update();
+        removeWirePoint(this, val);
       },
       disabled: function() {
         return writeDrawing;
@@ -92,13 +115,7 @@ var pathPointMenu = [
     {
       title: "Finish wire",
       action: function(data) {
-        currentWire.points.pop();
-        writeDrawing = false;
-        currentPoint = null;
-        currentWire = null;
-        wires.forEach(function (wire) { wire.points.forEach(function (p) { p[2] = false})});
-        update();
-        return;
+        finishWire();
       },
       disabled: function() {
         return !writeDrawing;
@@ -111,7 +128,7 @@ function round(p, n) {
 }
 
 function redrawWires() {
-  var w = svg.selectAll("path.wire").data(wires);
+  var w = wiresGroup.selectAll("path.wire").data(wires);
   w.enter()
     .append("path")
     .attr("d", function(d) {
@@ -144,16 +161,10 @@ function redrawWires() {
   .exit()
   .remove();
 
-  w.attr("d", function(d) {
+  w
+  .attr("d", function(d) {
     return gen(d.points);
   })
-  .on("mouseover", function() {
-    d3.select(this).attr("class", "active-wire");
-  })
-  .on("mouseout", function() {
-    d3.select(this).attr("class", "wire");
-  })
-  .call(lineDrag);
 }
 
 function removeDuplicates(wire) {
@@ -190,6 +201,7 @@ function pathPointsDragged(d) {
 }
 
 function lineDragged(d) {
+
   d3.select(this).attr("class", "active-wire");
 
   var x = d3.event.x;
@@ -290,24 +302,10 @@ function gridClick() {
   }
 }
 
-function init() {
-  pathPointsDrag = d3.drag().on("drag", pathPointsDragged);
-
-  lineDrag = d3.drag()
-  .on("drag", lineDragged)
-  .on("start", lineDraggedStart)
-  .on("end", lineDraggedEnd);
-
-  svg = d3
-  .select("body")
-  .append("svg")
-  .attr("width", width)
-  .attr("height", height);
-
- 
-  svgrect = svg.node().getBoundingClientRect();
-
-  var grid = svg.append("g").attr("class", "grid");
+function drawGrid() {
+  var grid = svg
+  .append("g")
+  .attr("class", "grid");
 
   grid
     .selectAll(".vertical")
@@ -338,7 +336,8 @@ function init() {
     .attr("y2", function(d) {
       return d * resolution;
     });
-  
+
+     
   svg
   .on(
     "contextmenu",
@@ -354,6 +353,22 @@ function init() {
       }
     })
   );
+}
+
+function init() {
+  svg = d3
+  .select("body")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height);
+
+  pathPointsDrag = d3.drag().on("drag", pathPointsDragged);
+  lineDrag = d3.drag()
+  .on("drag", lineDragged)
+  .on("start", lineDraggedStart)
+  .on("end", lineDraggedEnd);
+
+  drawGrid();
   
   svg
   .on("mousemove", function(d) {
@@ -433,6 +448,9 @@ function init() {
       update();
     }
   });
+
+  svg.on("dblclick", () => finishWire(false))
+  
   svg.on("click", gridClick)
 
   svg.on("mousedown", function() {
@@ -502,7 +520,15 @@ function init() {
       .selectAll("rect.selection")
       .remove();
     });
-  var wiresPaths = svg.selectAll("path.wire").data(wires);
+
+  wiresGroup = svg
+  .append("g")
+  .attr("class", "wiresGroup")
+
+  var wiresPaths = 
+    wiresGroup
+    .selectAll("path.wire")
+    .data(wires);
 
   wiresPaths
   .enter()
@@ -522,7 +548,6 @@ function init() {
       }
     })
   );
-
 
   group = svg
   .append("g")
@@ -553,7 +578,7 @@ function redrawWirePoints() {
       circles
         .enter()
         .append("circle")
-        .attr('r', 2)
+        .attr('r', 3)
         .attr('cx', function (d) { return d[0] })
         .attr('cy', function (d) { return d[1] })
         .attr('class', function(d, i) {
@@ -571,14 +596,14 @@ function redrawWirePoints() {
           })
         )
         .on("mouseover", function() {
-          d3.select(this).attr("r", 4);
+          d3.select(this).attr("r", 3);
           var g = d3.select(this.parentNode);
           g.attr("class", "pathPointGroupActive");
 
           g.node().parentNode.appendChild(g.node());
         })
         .on("mouseout", function() {
-          d3.select(this).attr("r", 2);
+          d3.select(this).attr("r", 3);
           d3.select(this.parentNode).attr("class", "pathPointGroup");
         })
         .on("click", function(d) {
@@ -625,7 +650,7 @@ function redrawWirePoints() {
       circles
         .enter()
         .append("circle")
-        .attr('r', 2)
+        .attr('r', 3)
         .attr('cx', function (d) { return d[0] })
         .attr('cy', function (d) { return d[1] })
         .on("contextmenu",
@@ -639,7 +664,7 @@ function redrawWirePoints() {
           d3.select(this).attr("r", 3);
         })
         .on("mouseout", function() {
-          d3.select(this).attr("r", 2);
+          d3.select(this).attr("r", 3);
         })
         .on("click", function(d) {
           if (writeDrawing)
@@ -736,5 +761,4 @@ function update() {
   redrawWirePoints();
 }
 
-init();
-update();
+init(); 

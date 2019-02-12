@@ -33,16 +33,16 @@ path.wire {
 
 path.active-wire {
 	fill: none;
-	stroke: #777;
+	stroke: black;
 }
 
 .active-wire {
   stroke: black;
   cursor: pointer;
-  stroke-width: 3px;
+  stroke-width: 5px;
 }
 .wire {
-  stroke-width: 1px;
+  stroke-width: 5px;
 }
 
 rect.selection {
