@@ -30,73 +30,21 @@
     </style>
   </head>
   <body>
-      <svg id="library" class="library" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-            <g transform="scale(1.2)" id="mosfet" nativeWidth="34"  nativeHeight="36"  title="Transistor (MOSFET): N-CH, DUAL GATE, DEP 2" transform="matrix(.6 0 0 .6 0 0)" >
-                <rect x="49" y="-1" width="2" height="2" fill="#000000" stroke="none"/>
-                <rect x="49" y="59" width="2" height="2" fill="#000000" stroke="none"
-                      />
-                <rect x="-1" y="49" width="2" height="2" fill="#000000" stroke="none"
-                      />
-                <rect x="-1" y="29" width="2" height="2" fill="#000000" stroke="none"
-                      />
-                <ellipse cx="37" cy="30" rx="26.881301575" ry="26.881301575"
-                         fill="#ffffff" stroke="#000000" stroke-width="2"
-                         />
-                <path d="M 50 1 L 50 14.5" fill="#000000" stroke="#000000"
-                      stroke-width="2" stroke-linecap="square" stroke-miterlimit="10"
-                      />
-                <path d="M 50 49 L 50 59" fill="#000000" stroke="#000000"
-                      stroke-width="2" stroke-linecap="square" stroke-miterlimit="10"
-                      />
-                <path d="M 50 15 L 35 15" fill="none" stroke="#000000" stroke-width="2"
-                      stroke-linejoin="round" stroke-linecap="round"
-                      stroke-miterlimit="10" />
-                <path d="M 50 45 L 35 45" fill="none" stroke="#000000" stroke-width="2"
-                      stroke-linejoin="round" stroke-linecap="round"
-                      stroke-miterlimit="10" />
-                <path d="M 42 30 L 50 30 L 50 49" fill="none" stroke="#000000"
-                      stroke-width="2" stroke-linejoin="round" stroke-linecap="round"
-                      stroke-miterlimit="10" />
-                <ellipse cx="50" cy="45" rx="2.0000151" ry="2.0000151" fill="none"
-                         stroke="#000000" stroke-width="2" />
-                <path d="M 35 10 L 35 50" fill="none" stroke="#000000" stroke-width="2"
-                      stroke-linejoin="round" stroke-linecap="round"
-                      stroke-miterlimit="10" />
-                <path d="M 1 50 L 26 50" fill="#000000" stroke="#000000"
-                      stroke-width="2" stroke-linecap="square" stroke-miterlimit="10"
-                      />
-                <path d="M 1 30 L 26 30" fill="#000000" stroke="#000000"
-                      stroke-width="2" stroke-linecap="square" stroke-miterlimit="10"
-                      />
-                <path d="M 27 35 L 27 50" fill="none" stroke="#000000" stroke-width="2"
-                      stroke-linejoin="round" stroke-linecap="round"
-                      stroke-miterlimit="10" />
-                <path d="M 27 30 C 27 15 27 15 27 15" fill="none" stroke="#000000"
-                      stroke-width="2" stroke-linejoin="round" stroke-linecap="round"
-                      stroke-miterlimit="10" />
-                <path d="M 42.38 26 L 36.38 30 L 42.38 34 Z" fill="#000000"
-                      stroke="#000000" stroke-linejoin="round" stroke-linecap="round"
-                      stroke-miterlimit="10" />
-                <rect x="-15" y="0" width="15" height="13" fill-opacity="0"
-                      fill="#dae2f2" stroke="none" />
-            </g>
-          <g id="npn">
-            <circle class="connector" data-connectorName="B" cx="3" cy="38" r="3"/>
-            <circle class="connector" data-connectorName="C" cx="56" cy="-1" r="3"/>
-            <circle class="connector" data-connectorName="E" cx="56" cy="78" r="3"/>
+      <script src="namespaces.js"></script>
+      <script src="tools.js"></script>
+      <script src="pathGenerator.js"></script>
+      <script src="point.js"></script>
+      <script src="wire.js"></script>
+      <script src="wires.js"></script>
+      <script src="schematicPresenter.js"></script>
+      <script src="schematicView.js"></script>
 
-            <g category="Transistor" title="BJP NPN" transform="matrix(1 0 0 1 0 0)" id="component1" nativeWidth="77" nativeHeight="77">
-              <g font-size="18px" font-family="Times New Roman">
-                <text y="34">B</text><text x="64" y="17">C</text><text x="64" y="74">E</text></g>
-              <g stroke="#000" stroke-width="3.6" fill="none">
-                <path d="m56,2v14L36,30m0,16l20,14v14M6,38H34.3m0-17v34m1.4,0V21M46,56l3-4 4,6zM14,37a28,28 0 1,1 0,2"/></g>
-              <rect id="cover" width="77" height="77" fill="white" fill-opacity="0" stroke="none"/></g>
-            </g>
-        </defs>
-      </svg>
+      <div id="schematic">
 
-      
-      <script src="app.js"></script>
+      </div>
+
+      <script>
+            var view = new SchematicView(800, 600, 10, "#schematic");
+      </script>
   </body>
 </html>

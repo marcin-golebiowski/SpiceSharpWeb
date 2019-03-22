@@ -1,3 +1,8 @@
+body {
+  padding: 0;
+  margin: 0;
+}
+
 svg.editor-area {
   box-sizing: border-box;
   border: 1px solid rgb(212, 212, 212);
@@ -36,13 +41,9 @@ path.active-wire {
   stroke: #ccc;
 }
 
-.active-wire {
-  stroke: black;
-  cursor: pointer;
-  stroke-width: 5px;
-}
+
 .wire {
-  stroke-width: 5px;
+  stroke-width: 3px;
 }
 
 rect.selection {
@@ -57,4 +58,12 @@ rect.selected {
   stroke:rgb(0,0,0, 0.3);
   shape-rendering:crispEdges;
   cursor: move;
+}
+
+circle.not-selected {
+  fill:rgba(0,0,0, 0.6);  
+}
+
+circle.selected {
+  fill:rgba(0,0,0, 1);
 }
