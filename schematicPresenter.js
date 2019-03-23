@@ -1,8 +1,9 @@
 function SchematicPresenter(view) {
     var self = this;
     self.wires = new Wires();
-    self.writeDrawing = false;
+    self.netMatrix  = new NetMatrix(view.width / view.resolution, view.height / view.resolution);
 
+    self.writeDrawing = false;
     self.currentWire = null;
     self.currentPoint = null;
   
@@ -29,8 +30,8 @@ function SchematicPresenter(view) {
     }
 
     function removeWire(wire) {
-      var wires = self.wires.wires;
-      for (var i = 0; i <wires.length; i++) {
+      var wires = self.wires.elements;
+      for (var i = 0; i < wires.length; i++) {
         if (wires[i] === wire) {
           wires.splice(i, 1);
         }
@@ -46,14 +47,33 @@ function SchematicPresenter(view) {
           var lastPoint = currentWire.points[currentWire.points.length - 1];
           if (lastPoint.x !== self.currentPoint.x) {
             currentWire.addPoint(new Point(lastPoint.x, self.currentPoint.y, true));  
-          }
+          }         
       }
       currentWire.addPoint(new Point(self.currentPoint.x, self.currentPoint.y, true));  
       view.updateWires(); // TODO: update only one wire
+
+      updateNetMatrix();
     }
 
+    function updateNetMatrix() {
+
+      self.netMatrix.clear();
+
+      for (var i = 0; i < self.wires.elements.length; i++) {
+        var wire = self.wires.elements[i];
+        for (var j = 0; j < wire.points.length; j++) {
+
+          var gridX = wire.points[j].x;
+          var gridY = wire.points[j].y;
+          var gridPoint = self.netMatrix.points[gridX][gridY];
+          gridPoint.addWire(wire);
+        }
+      }
+    }
+
+
     function removePoint(point) {
-      var wires = self.wires.wires;
+      var wires = self.wires.elements;
 
       for (var i = 0; i < wires.length; i++) {
         var points = wires[i].points;
@@ -64,6 +84,7 @@ function SchematicPresenter(view) {
            }
         }
       }
+      updateNetMatrix();
 
       view.updateWires();
     }
@@ -75,6 +96,7 @@ function SchematicPresenter(view) {
       newWire,
       finishWire,
       removeWire,
+      updateNetMatrix,
       get writeDrawing() {
         return self.writeDrawing;
       },

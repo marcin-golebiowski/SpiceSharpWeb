@@ -18,7 +18,7 @@ function Wires() {
     return {
       remove,
       add,
-      get wires() {
+      get elements() {
         return self.wires;
       },
       get name() {

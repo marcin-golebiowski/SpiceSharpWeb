@@ -1,6 +1,6 @@
 function SchematicView(width, height, resolution) {
   var self = this;
-
+  var pathGenerator = new PathGenerator(resolution);
   // public
   self.presenter = null;
   self.width = width;
@@ -22,8 +22,8 @@ function SchematicView(width, height, resolution) {
     d3
       .select(wireNode)
       .selectAll('circle')
-      .attr('cx', function (d) { return d.x })
-      .attr('cy', function (d) { return d.y })
+      .attr('cx', function (d) { return d.x * resolution })
+      .attr('cy', function (d) { return d.y * resolution })
       .attr('class', function (d, i) {
         if (d.selected) {
           return 'selected';
@@ -34,26 +34,25 @@ function SchematicView(width, height, resolution) {
 
   self.updateWires = function () {
 
-    var wiresObj = self.presenter.getWires();
-    var wires = wiresObj.wires;
-
+    var wires = self.presenter.getWires().elements;
     var lineDrag = d3.drag();
-
     var lineDragStart = d3.local();
 
     lineDrag
       .on('start', function (wire) {
-        lineDragStart.set(this, { x: tools.round(d3.event.x, resolution), y: tools.round(d3.event.y, resolution) });
+        lineDragStart.set(this, { x: Math.floor(d3.event.x / resolution), y: Math.floor(d3.event.y / resolution) });
       })
       .on('end', function (wire) {
-        var x = tools.round(d3.event.x, resolution);
-        var y = tools.round(d3.event.y, resolution);
+        var x = Math.floor(d3.event.x / resolution);
+        var y = Math.floor(d3.event.y / resolution);
         wire.move(x - lineDragStart.get(this).x, y - lineDragStart.get(this).y);
+
+        self.presenter.updateNetMatrix();
         updateWire(this.parentNode);
       })
       .on('drag', function (wire) {
-        wire.move(d3.event.x - lineDragStart.get(this).x, d3.event.y - lineDragStart.get(this).y);
-        lineDragStart.set(this, { x: d3.event.x, y: d3.event.y });
+        wire.move( Math.floor(d3.event.x / resolution) - lineDragStart.get(this).x,  Math.floor(d3.event.y / resolution) - lineDragStart.get(this).y);
+        lineDragStart.set(this, { x: Math.floor(d3.event.x / resolution), y: Math.floor(d3.event.y / resolution) });
         updateWire(this.parentNode);
       })
 
@@ -105,6 +104,9 @@ function SchematicView(width, height, resolution) {
       .exit()
       .remove();
 
+
+  
+
     self.wiresGroup
       .selectAll("g.wire")
       .each(function (data, i) {
@@ -127,20 +129,23 @@ function SchematicView(width, height, resolution) {
         var circles = d3.select(this)
           .selectAll("circle")
           .data(points);
-
+        
         var circleDrag = d3.drag();
+        var circleDragStart = d3.local();
 
         circleDrag
+          .on('start', function (point) {
+            circleDragStart.set(this, { x: Math.floor(d3.event.x / resolution), y: Math.floor(d3.event.y / resolution) });
+          })
           .on('drag', function (point) {
-            var x = tools.round(d3.event.x, resolution);
-            var y = tools.round(d3.event.y, resolution);
-
-            point.x = x;
-            point.y = y;
+            var xDiff = - circleDragStart.get(this).x + Math.floor(d3.event.x / resolution);
+            var yDiff =  - circleDragStart.get(this).y + Math.floor(d3.event.y / resolution);
+            point.x += xDiff;
+            point.y += yDiff;
+            circleDragStart.set(this, { x: Math.floor(d3.event.x / resolution), y: Math.floor(d3.event.y / resolution) });
 
             updateWire(this.parentNode);
           })
-
 
         var circleMenu = [
           {
@@ -263,8 +268,8 @@ function SchematicView(width, height, resolution) {
       .svgRoot
       .on("mousemove", function (d) {
         if (self.presenter.writeDrawing) {
-          var x = tools.round(d3.event.x, resolution);
-          var y = tools.round(d3.event.y, resolution);
+          var x = Math.floor(d3.event.x / resolution);
+          var y = Math.floor(d3.event.y / resolution);
           self.presenter.currentPoint = new Point(x, y);
         }
       });
@@ -307,8 +312,8 @@ function SchematicView(width, height, resolution) {
       .data(data, function (d) { return d != null ? d.x + "-" + d.y : null })
       .join("circle")
       .attr("class", "currentPoint")
-      .attr("cx", function (d) { return d.x })
-      .attr("cy", function (d) { return d.y })
+      .attr("cx", function (d) { return d.x * resolution })
+      .attr("cy", function (d) { return d.y * resolution })
       .attr("r", 3);
   }
 
