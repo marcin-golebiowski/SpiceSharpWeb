@@ -27,9 +27,27 @@ function SchematicPresenter(view) {
   
       update();
     }
+
+    function removeWire(wire) {
+      var wires = self.wires.wires;
+      for (var i = 0; i <wires.length; i++) {
+        if (wires[i] === wire) {
+          wires.splice(i, 1);
+        }
+      }
+
+      update();
+    }
   
     function addPointToWire() {
       currentWire.deselect();
+
+      if (currentWire.points.length > 0) {
+          var lastPoint = currentWire.points[currentWire.points.length - 1];
+          if (lastPoint.x !== self.currentPoint.x) {
+            currentWire.addPoint(new Point(lastPoint.x, self.currentPoint.y, true));  
+          }
+      }
       currentWire.addPoint(new Point(self.currentPoint.x, self.currentPoint.y, true));  
       view.updateWires(); // TODO: update only one wire
     }
@@ -56,6 +74,7 @@ function SchematicPresenter(view) {
       getWires,
       newWire,
       finishWire,
+      removeWire,
       get writeDrawing() {
         return self.writeDrawing;
       },
@@ -70,12 +89,10 @@ function SchematicPresenter(view) {
         if (self.currentPoint == null || !self.currentPoint.equals(value)) {
           redraw = true;
         }
-        if (self.currentPoint == null)
-        {
+        if (self.currentPoint == null) {
           self.currentPoint = value;
         }
-        else
-        {
+        else {
           self.currentPoint.x = value.x;
           self.currentPoint.y = value.y;
         }
