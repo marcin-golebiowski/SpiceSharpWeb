@@ -71,6 +71,16 @@ function SchematicView(width, height, resolution) {
         disabled: function () {
           return self.presenter.writeDrawing;
         }
+      },
+      {
+        title: "Get node id",
+        action: function (wire) {
+          self.presenter.getNodeId(wire);
+          return true;
+        },
+        disabled: function () {
+          return false;
+        }
       }
     ];
 
@@ -78,12 +88,15 @@ function SchematicView(width, height, resolution) {
       .enter()
       .append("g")
       .attr("class", "wire")
-      .append("path")
-      .attr("class", "wire")
+      .append("path")        
       .on("mouseover", function (d) {
+        var gridX = Math.floor(d3.event.x / resolution);
+        var gridY = Math.floor(d3.event.y / resolution);
+        self.presenter.selectWires(gridX, gridY);
       })
       .on("mouseout", function (d) {
-      })
+        self.presenter.deselectWires();
+      })   
       .call(lineDrag)
       .on(
         "contextmenu",
@@ -117,12 +130,13 @@ function SchematicView(width, height, resolution) {
           .attr("d", function (d) {
             return pathGenerator.generate(d.points);
           })
-          .attr("class", function (d) {
+         
+          .attr('class', function (d, i) {
             if (d.selected) {
-              return "active-wire";
+              return 'active-wire';
             }
-            return "wire";
-          });
+            return 'wire';
+          })
 
         // update points
         var points = data.points;

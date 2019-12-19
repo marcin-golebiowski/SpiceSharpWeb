@@ -56,21 +56,31 @@ function SchematicPresenter(view) {
     }
 
     function updateNetMatrix() {
-
       self.netMatrix.clear();
-
-      for (var i = 0; i < self.wires.elements.length; i++) {
-        var wire = self.wires.elements[i];
-        for (var j = 0; j < wire.points.length; j++) {
-
-          var gridX = wire.points[j].x;
-          var gridY = wire.points[j].y;
-          var gridPoint = self.netMatrix.points[gridX][gridY];
-          gridPoint.addWire(wire);
-        }
-      }
+      self.netMatrix.fill(self.wires.elements);
+      self.netMatrix.connect();
     }
 
+    function selectWires(gridX, gridY) {
+        var wiresSet = self.netMatrix.getConnectedWires(gridX, gridY);
+        for (let item of wiresSet) { 
+          item.selected = true;
+        }
+        update();
+    }
+
+    function deselectWires() {
+      var elements = self.wires.elements;
+      
+      for (let item of elements) { 
+        item.selected = false;
+      }
+      update();
+    }
+
+    function getNodeId(wire) {
+      alert(self.netMatrix.getNodeId(wire));
+    }
 
     function removePoint(point) {
       var wires = self.wires.elements;
@@ -92,11 +102,14 @@ function SchematicPresenter(view) {
     return {
       removePoint,
       addPointToWire,
+      getNodeId,
       getWires,
       newWire,
       finishWire,
       removeWire,
       updateNetMatrix,
+      selectWires,
+      deselectWires,
       get writeDrawing() {
         return self.writeDrawing;
       },

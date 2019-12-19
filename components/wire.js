@@ -3,6 +3,7 @@ function Wire(id) {
   
     self._id = id;
     self._points = [];
+    self.selected = false;
   
     function onPointChange(point, propertyName) {
     }
@@ -45,6 +46,12 @@ function Wire(id) {
       id: getId,
       addPoint,
       deselect,
+      set selected(value) {
+        self.select = value;
+      },
+      get selected() {
+        return self.select;
+      },
       get points() {
         return getPoints()
       },

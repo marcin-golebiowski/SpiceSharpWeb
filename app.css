@@ -38,12 +38,12 @@ path.wire {
 
 path.active-wire {
   fill: none;
-  stroke: #ccc;
+  stroke: #000;
 }
 
 
 .wire {
-  stroke-width: 3px;
+  stroke-width: 2px;
 }
 
 rect.selection {
